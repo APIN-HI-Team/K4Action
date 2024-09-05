@@ -25,7 +25,7 @@
             <div class="grid grid-cols-12 gap-4">
 
                 <!--Start side bar -->
-                <div class="col-span-3 bg-white h-fit rounded p-4 drop-shadow-md">
+                <div class="col-span-2 bg-white h-fit rounded p-4 drop-shadow-md">
                     <p class="text-sm font-medium">APPLY FILTERS BELOW TO LOAD DATA</p>
 
                     <!--begin::Form-->
@@ -82,6 +82,51 @@
                                 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" data-toggle="select2" multiple="multiple">
                             </select>
                         </div>
+
+                        <!-- Sex -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="state" class="block text-sm text-gray-500 mt-5">
+                                <i class="uil uil-map-pin-alt"></i> Sex
+                            </label>
+                            <select id="sex" name="sex"
+                                    class="e2 select2 mt-1 block w-full py-2 px-3 border
+                                        border-gray-300 bg-white rounded-md shadow-sm focus:outline-none
+                                        focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    multiple="multiple">
+                                <option value="" disabled></option>
+                                <option value="M">Male</option>
+                                <option value="F">Female</option>
+                            </select>
+                        </div>
+                        <!-- End States -->
+
+                        <!-- Age Group -->
+                        <div class="col-span-6 sm:col-span-3">
+                            <label for="state" class="block text-sm text-gray-500 mt-5">
+                                <i class="uil uil-map-pin-alt"></i> Select Age Group
+                            </label>
+                            <select id="age_groups" name="age_group"
+                                    class="e2 select2 mt-1 block w-full py-2 px-3 border
+                                        border-gray-300 bg-white rounded-md shadow-sm focus:outline-none
+                                        focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                                    multiple="multiple">
+                                <option value="" disabled></option>
+                                <option value="LessThan1"><1</option>
+                                <option value="1To4">1-4</option>
+                                <option value="5To9">5-9</option>
+                                <option value="10To14">10-14</option>
+                                <option value="15To19">15-19</option>
+                                <option value="20To24">20-24</option>
+                                <option value="25To29">25-29</option>
+                                <option value="30To34">30-34</option>
+                                <option value="35To39">35-39</option>
+                                <option value="40To44">40-44</option>
+                                <option value="45To49">45-49</option>
+                                <option value="50">50+</option>
+                            </select>
+                        </div>
+                        <!-- End States -->
+
                         <div id="div1">
                             <div class="col-span-6 sm:col-span-3 mt-5">
                                 <label for="cat" class="block text-sm text-gray-500">
@@ -105,12 +150,12 @@
                         </div>
 
                         <div class="col-span-6 sm:col-span-3 mt-5 text-left">
-                            <button class="inline-flex justify-center py-2 px-4 border border-transparent
+                            <button class="inline-flex justify-center py-2 px-2 border border-transparent
                                     shadow-sm text-sm font-bold rounded-md text-white bg-indigo-500 hover:bg-indigo-700
                                     focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Load Data
                             </button>
 
-                            <button type="reset" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm
+                            <button type="reset" class="inline-flex justify-center py-2 px-2 border border-transparent shadow-sm
                                         text-sm font-bold rounded-md text-white bg-gray-500 hover:bg-gray-700 focus:ring-2
                                         focus:ring-offset-2 focus:ring-indigo-500">Clear
                             </button>
@@ -122,10 +167,10 @@
                 <!-- end side bar -->
 
                 <!-- Main content -->
-                <div class="col-span-9">
+                <div class="col-span-10">
                     <div class="grid grid-cols-1">
                         <div class="col-span-1 bg-white drop-shadow-md relative">
-                            <div class="box-heading ml-4 mt-2 font-bold text-sm">
+                            <div class="box-heading ml-4 mt-2 mb-4 font-bold text-sm">
                                 Advanced HIV Disease (AHD) Cascade
                             </div>
                             <div class="box-content">
@@ -140,7 +185,7 @@
 
                     <div class="grid grid-cols-1 mt-8">
                         <div class="col-span-1 bg-white drop-shadow-md relative">
-                            <div class="box-heading ml-4 mt-2 font-bold text-sm">
+                            <div class="box-heading ml-4 mt-2 mb-4 font-bold text-sm">
                                 Cryptococcal Meningitis (CM) Cascade
                             </div>
                             <div class="box-content">
@@ -152,7 +197,7 @@
 
                     <div class="grid grid-cols-1 mt-8">
                         <div class="col-span-1 bg-white drop-shadow-md relative">
-                            <div class="box-heading ml-4 mt-2 font-bold text-sm">
+                            <div class="box-heading ml-4 mt-2 mb-4 font-bold text-sm">
                                 Tuberculosis (TB) Cascade
                             </div>
                             <div class="box-content">

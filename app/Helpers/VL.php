@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\VLDashboard;
 use App\Models\VLPerformance;
 use Illuminate\Support\Facades\DB;
 
@@ -9,24 +10,34 @@ class VL
 {
     public static function vLGraph($data): array
     {
-        $facilityList = VLPerformance::select(DB::raw(
-            "CAST(COALESCE(SUM(active),0)  AS UNSIGNED) as `active`,
-            CAST(COALESCE(SUM(eligible),0)  AS UNSIGNED) as `eligible`,
-            CAST(COALESCE(SUM(supressedVl),0)  AS UNSIGNED) as supressedVl ,
-            CAST(COALESCE(SUM(eligibleWithVl),0)  AS UNSIGNED) as eligibleWithVl ,
+        $facilityList = VLDashboard::select(DB::raw(
+            "
+            CAST(COALESCE(SUM(`active`),0)  AS UNSIGNED) AS `active`,
+            CAST(COALESCE(SUM(`eligible`),0)  AS UNSIGNED) AS `eligible`,
+            CAST(COALESCE(SUM(`suppressed`),0)  AS UNSIGNED) AS `supressedVl`,
+            CAST(COALESCE(SUM(`no_vl_result`),0)  AS UNSIGNED) AS `eligibleWithVl`,
             state"
         ))
             ->state($data->states)->lga($data->lgas)->facilities($data->facilities)
             ->groupBy('state')
             ->orderBy('state', 'ASC')
-            //->groupBy('eligibleWithVl')
-            // ->groupBy('eligible')
-            // ->groupBy('supressedVl')
-            // ->groupBy('active')
-            // ->groupBy('lgaCode')
-            // ->groupBy('facility_name')
             ->withoutGlobalScopes()
             ->get();
+
+        $facilityList2 = VLDashboard::select(DB::raw(
+            "
+            CAST(COALESCE(SUM(`active`),0)  AS UNSIGNED) AS `active`,
+            CAST(COALESCE(SUM(`eligible`),0)  AS UNSIGNED) AS `eligible`,
+            CAST(COALESCE(SUM(`suppressed`),0)  AS UNSIGNED) AS `supressedVl`,
+            CAST(COALESCE(SUM(`no_vl_result`),0)  AS UNSIGNED) AS `eligibleWithVl`,
+            ip"
+        ))
+            ->state($data->states)->lga($data->lgas)->facilities($data->facilities)
+            ->groupBy('ip')
+            ->withoutGlobalScopes()
+            ->first();
+
+
 
         $state = [];
         $lga = [];
@@ -48,7 +59,7 @@ class VL
         }
 
         $result=[
-            'treatment_perfomance' => (!empty($list)) ? (array) $list->getAttributes() : [],
+            'treatment_perfomance' => (!empty($facilityList2)) ? (array) $facilityList2->getAttributes() : [],
             'states'=>$state,
             'lgas'=>$lga,
             'facilities'=>$facility,

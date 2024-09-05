@@ -101,7 +101,7 @@
         </div>
         <!---Image -->
         <div class="md:w-1/2">
-            <img src="{{asset('assets/image/illustration.jpg')}}" class="z-0" alt="illustration">
+            <img src="{{asset('assets/image/illustration.svg')}}" class="z-0" alt="illustration">
 
         </div>
     </div>

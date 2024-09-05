@@ -83,7 +83,7 @@
             <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
                 <div class="grid grid-cols-12 gap-4">
                     <!--Start side bar -->
-                    <div class="col-span-3 bg-white h-fit rounded p-4 shadow-md max-w-sm max-h-fit">
+                    <div class="col-span-2 bg-white h-fit rounded p-4 shadow-md max-w-sm max-h-fit">
                         <p class="text-sm font-medium">APPLY FILTERS BELOW TO LOAD DATA</p>
 
                         <!--begin::Form-->
@@ -143,12 +143,12 @@
 
 
                             <div class="col-span-6 sm:col-span-3 mt-5 text-left">
-                                <button class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm
+                                <button class="inline-flex justify-center py-2 px-2 border border-transparent shadow-sm
                                 text-sm font-bold rounded-md text-white bg-indigo-500 hover:bg-indigo-700 focus:outline-none
                                 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Load Data
                                 </button>
 
-                                <button type="reset" id="clearData" class="inline-flex justify-center py-2 px-4 border
+                                <button type="reset" id="clearData" class="inline-flex justify-center py-2 px-2 border
                                 border-transparent shadow-sm text-sm font-bold rounded-md text-white bg-gray-500 hover:bg-gray-700
                                 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Clear
                                 </button>
@@ -160,7 +160,7 @@
                     <!-- end side bar -->
 
                     <!-- Main content -->
-                    <div class="col-span-9">
+                    <div class="col-span-10">
                         @yield('content')
                     </div>
                     <!-- End main content -->

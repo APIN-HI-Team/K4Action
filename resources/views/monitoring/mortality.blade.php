@@ -202,6 +202,26 @@
                     </div>
 
 
+                    <div class="grid grid-cols-1 mt-6">
+                        <div class="col-span-1 bg-white drop-shadow-md relative">
+                            <div class="box-content">
+                                <div class="chart" id="msAgeDisaggregate">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="grid grid-cols-1 mt-6">
+                        <div class="col-span-2 bg-white drop-shadow-md relative">
+                            <div class="box-content">
+                                <div class="chart" id="ageSexChart">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
 
 
 
@@ -282,10 +302,37 @@
                 }).done(function(data) {
                     var response = data.mortality_stats;
                     if (selectReports.val() === 'ms') {
+
+                        var age_group_categories = [
+                            '<1','1-4','5-9','10-14','15-19','20-24','25-29','30-34','35-39','40-44','45-49','50-54','55-59','60-64','65-69','70+'
+                        ];
+
+                        var tx_new_series = [
+                            {
+                                name: 'Male',
+                                data: data.deadAgeSex.male_data,
+                                color: '#A3A8E2'
+                            }, {
+                                name: 'Female',
+                                data: data.deadAgeSex.female_data,
+                                color: '#494FA3'
+                            }
+                        ];
+
+                        var male_max = Math.abs(Math.min.apply(Math, data.deadAgeSex.male_data));
+                        var female_max = Math.abs(Math.max.apply(Math, data.deadAgeSex.female_data));
+                        var max = female_max > male_max ? female_max : male_max;
                         //console.log(data.regimenLineQs);
 
                         $(".tx_states").html(response.states)
                         $(".tx_dead").html(Number(response.Dead).toLocaleString());
+                        Build_Pos_Neg_Chart1(
+                            'ageSexChart',
+                            'Number of Dead Clients Disaggregated by Age and Sex',
+                            age_group_categories,
+                            tx_new_series,
+                            max);
+
                         buildDataCharts(data);
 
                     }
@@ -332,7 +379,7 @@
 
 
                 //----------------Regimen Line-----------------------
-                let rgLines = [];
+                /*let rgLines = {};
                 let clls = [ 'rgb(121,150,164)', 'rgb(76,130,55)', 'rgb(121,150,164)', '#0d47a1', '#93911b', '#607d8b'];
                 if(data.regimenLineQs && data.regimenLineQs.length > 0)
                 {
@@ -340,7 +387,32 @@
                     {
                         rgLines.push({ name: rg.name, y: parseInt(rg.y), color: clls[i] });
                     });
+                }*/
+
+                let rgLines = {name: 'No. of Deaths', type: 'column',data: [], yAxis: 1 };
+                let rgLineCategories = [];
+                let rgLinesSpline = {name: 'Death Rate', data: [], type: 'spline', tooltip: { valueSuffix: '%'} };
+                let regSeries = [];
+                let regLineT = data.regimenLineQs.reduce((accumulator, object) =>
+                {
+                    return accumulator + object.y;
+                }, 0);
+
+                let clls = [ 'rgb(121,150,164)', 'rgb(76,130,55)', 'rgb(121,150,164)', '#0d47a1', '#93911b', '#607d8b'];
+
+                if(data.regimenLineQs && data.regimenLineQs.length > 0)
+                {
+                    data.regimenLineQs.forEach(function(rg, i)
+                    {
+                        rgLineCategories.push(rg.name);
+                        rgLines.data.push(parseInt(rg.y));
+                        let percT = (rg.y/regLineT) * 100;
+                        rgLinesSpline.data.push(parseInt(percT));
+                    });
                 }
+
+                regSeries.push(rgLines);
+                regSeries.push(rgLinesSpline);
 
                 //------------ART Duration---------------------
                 let artDurationLt1 = [];
@@ -361,16 +433,60 @@
                     [
                         { name: '<1 year', data: artDurationLt1 },
                         { name: '1 year - 3 years', data: artDurationGt2LtEq3 },
-                        { name: '> 3 years, >= 5 years', data: artDurationGt4LtEq5 },
+                        { name: '> 3 years, 5 years', data: artDurationGt4LtEq5 },
                         { name: '> 5 years', data: artDurationGt5 }
+                    ];
+
+
+                //------------Age Disaggregate---------------------
+                let ageLt1 = [];
+                let age1to4 = [];
+                let age4to9 = [];
+                let age10to14 = [];
+                let age15to19 = [];
+                let age20to24 = [];
+                let age25to29 = [];
+                let age30to34 = [];
+                let age35to39 = [];
+                let age40to44 = [];
+                let age45to49 = [];
+                let age50 = [];
+
+                if(data.ageband && data.ageband.length){
+                    data.ageband.forEach(function(rg, i){
+                        ageLt1.push({ name: rg.states, y: rg.less_1 });
+                        age1to4.push({ name: rg.states, y: rg.age_1_to_4 });
+                        age4to9.push({ name: rg.states, y: rg.age_4_to_9 });
+                        age10to14.push({ name: rg.states, y: rg.age_10_to_14 });
+                        age15to19.push({ name: rg.states, y: rg.age_15_to_19 });
+                        age20to24.push({ name: rg.states, y: rg.age_20_to_24 });
+                        age25to29.push({ name: rg.states, y: rg.age_25_to_29 });
+                        age30to34.push({ name: rg.states, y: rg.age_30_to_34 });
+                        age35to39.push({ name: rg.states, y: rg.age_35_to_39 });
+                        age40to44.push({ name: rg.states, y: rg.age_40_to_44 });
+                        age45to49.push({ name: rg.states, y: rg.age_45_to_49  });
+                        age50.push({ name: rg.states, y: rg.age_50 });
+                    });
+                }
+
+                let ageDisaggregateSeries =
+                    [
+                        { name: '<1', data: ageLt1 },
+                        { name: '1 - 4', data: age1to4 },
+                        { name: '4 - 9', data: age4to9 },
+                        { name: '10 - 14', data: age10to14 },
+                        { name: '15 - 19', data: age15to19 },
+                        { name: '20 - 24', data: age20to24 },
+                        { name: '25 - 29', data: age25to29 },
+                        { name: '30 - 34', data: age30to34 },
+                        { name: '35 - 39', data: age35to39 },
+                        { name: '40 - 44', data: age40to44 },
+                        { name: '45 - 49', data: age45to49 },
+                        { name: '50 and above', data: age50 }
                     ];
 
                 Highcharts.chart('msRegs',
                     {
-                        chart:
-                            {
-                                type: 'column'
-                            },
                         plotOptions:
                             {
                                 column:
@@ -384,6 +500,81 @@
                                 text: 'Number of Dead Clients by Last Regimen Line'
                             },
                         colors: ['rgb(74,20,140)', '#607d8b', '#64b5f6', '#7b1fa2', '#1565c0', '#3b5998', '#0d47a1', '#607d8b'],
+
+                        xAxis:
+                            [{
+                                categories: rgLineCategories,
+                                crosshair: true
+                            }],
+                        yAxis:
+
+                            [{ // Primary yAxis
+                                labels: {
+                                    //format: '{value}°C',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[1]
+                                    }
+                                },
+                                title: {
+                                    text: 'Regimen',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[1]
+                                    }
+                                }
+                            }, { // Secondary yAxis
+                                title: {
+                                    text: 'Death Rate',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[0]
+                                    }
+                                },
+                                labels: {
+                                    format: '{value} %',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[0]
+                                    }
+                                },
+                                min: 0,
+                                max: 100,
+                                opposite: true
+                            }],
+                        tooltip:
+                            {
+                                headerFormat: '<span style="font-size:13px; font-weight: bold">{point.key}</span><table>',
+                                pointFormat: '<tr><td style="color:{point.color};padding:0">{series.name}: </td>' +
+                                    '<td style="padding:0"><b>{point.y} <b></td></tr>',
+                                footerFormat: '</table>',
+                                shared: true,
+                                useHTML: true
+                            },
+                        series: regSeries //[ { name: 'Deaths by Regimen Line', data: rgLines } ]
+
+                    });
+
+                Highcharts.chart('msAgeDisaggregate',
+                    {
+                        chart:
+                            {
+                                type: 'column'
+                            },
+                        plotOptions:
+                            {
+                                column:
+                                    {
+                                        stacking: 'percent',
+                                        dataLabels:
+                                            {
+                                                enabled: true
+                                            },
+                                        pointPadding: 0,
+                                        borderWidth: 0
+                                    }
+                            },
+                        title:
+                            {
+                                text: 'Number of Dead Clients Disaggregated by Age Band'
+                            },
+                        colors: ['#ff9e80', '#ff5722', '#ff9800', '#607d8b', '#64b5f6', '#888888', '#1565c0', '#000000'], //, '#bbdefb', '#0d47a1'
                         xAxis:
                             {
                                 title:
@@ -417,14 +608,14 @@
                             },
                         tooltip:
                             {
-                                headerFormat: '<span style="font-size:13px; font-weight: bold">{point.key}</span><table>',
-                                pointFormat: '<tr><td style="color:{point.color};padding:0">{series.name}: </td>' +
+                                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
                                     '<td style="padding:0"><b>{point.y} <b></td></tr>',
                                 footerFormat: '</table>',
                                 shared: true,
                                 useHTML: true
                             },
-                        series: [ { name: 'Deaths by Regimen Line', data: rgLines } ]
+                        series: ageDisaggregateSeries
                     });
 
 
@@ -663,9 +854,9 @@
                     let yrMarch = (qm.january/qm.q1) * 100;
 
                     let q1Rates = [];
-                    q1Rates.push({ name: 'January Death Rate', y: yrJan });
-                    q1Rates.push({ name: 'February Death Rate', y: yrFeb });
-                    q1Rates.push({ name: 'March Death Rate', y: yrMarch });
+                    q1Rates.push({ name: 'January', y: parseInt(yrJan) });
+                    q1Rates.push({ name: 'February', y: parseInt(yrFeb) });
+                    q1Rates.push({ name: 'March', y: parseInt(yrMarch) });
 
                     //--- Q2 --------
                     let yrApril = (qm.april/qm.q2) * 100;
@@ -673,9 +864,9 @@
                     let yrJune = ( qm.june/qm.q2) * 100;
 
                     let q2Rates = [];
-                    q2Rates.push({ name: 'April Death Rate', y: yrApril });
-                    q2Rates.push({ name: 'May Death Rate', y: yrMay });
-                    q2Rates.push({ name: 'June Death Rate', y: yrJune });
+                    q2Rates.push({ name: 'April', y: parseInt(yrApril) });
+                    q2Rates.push({ name: 'May', y: parseInt(yrMay) });
+                    q2Rates.push({ name: 'June', y: parseInt(yrJune) });
 
                     //--- Q3 --------
                     let yrJuly = (qm.july /qm.q3 ) * 100;
@@ -683,9 +874,9 @@
                     let yrSept = ( qm.september/qm.q3) * 100;
 
                     let q3Rates = [];
-                    q3Rates.push({ name: 'July Death Rate', y: yrJuly });
-                    q3Rates.push({ name: 'August Death Rate', y: yrAug });
-                    q3Rates.push({ name: 'September Death Rate', y: yrSept });
+                    q3Rates.push({ name: 'July', y: parseInt(yrJuly) });
+                    q3Rates.push({ name: 'August', y: parseInt(yrAug) });
+                    q3Rates.push({ name: 'September', y: parseInt(yrSept) });
 
                     //--- Q4 --------
                     let yrOct = (qm.october/qm.q4 ) * 100;
@@ -693,9 +884,9 @@
                     let yrDec = (qm.december/qm.q4 ) * 100;
 
                     let q4Rates = [];
-                    q4Rates.push({ name: 'October Death Rate', y: yrOct });
-                    q4Rates.push({ name: 'November Death Rate', y: yrNov });
-                    q4Rates.push({ name: 'December Death Rate', y: yrDec });
+                    q4Rates.push({ name: 'October', y: parseInt(yrOct) });
+                    q4Rates.push({ name: 'November', y: parseInt(yrNov) });
+                    q4Rates.push({ name: 'December', y: parseInt(yrDec) });
 
                     //----------------------------------
 
@@ -705,17 +896,17 @@
                     let q3rate = (qm.q3 / tDTT) * 100;
                     let q4rate = (qm.q4 / tDTT) * 100;
 
-                    drillDowns.push({ name: 'Q1', data: q1D, id: qm.year + 'Q1', type: 'column' });
-                    drilldownTrends.push({ name: 'Q1-Rate', data: q1Rates, type: 'scatter', id: qm.year + 'Q1-Rate', yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' }, ref: qm.year + 'Q1' });
+                    drillDowns.push({ name: 'Q1', data: q1D, id: qm.year + 'Q1', type: 'column', qs: 'Q1' });
+                    drilldownTrends.push({ name: 'Death Rate', data: q1Rates, type: 'spline', tooltip: { valueSuffix: '%'}, id: qm.year + 'Q1-Rate', qr: 'Q1', yAxis: 1 });
 
-                    drillDowns.push({ name: 'Q2', data: q2D, id: qm.year + 'Q2', type: 'column' });
-                    drilldownTrends.push({ name: 'Q2-Rate', data: q2Rates, type: 'scatter', id: qm.year + 'Q2-Rate', yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' }, ref: qm.year + 'Q2' });
+                    drillDowns.push({ name: 'Q2', data: q2D, id: qm.year + 'Q2', type: 'column', qs: 'Q2' });
+                    drilldownTrends.push({ name: 'Death Rate', data: q2Rates, type: 'spline', tooltip: { valueSuffix: '%'}, id: qm.year + 'Q2-Rate', qr: 'Q2', yAxis: 1 });
 
-                    drillDowns.push({ name: 'Q3', data: q3D, id: qm.year + 'Q3', type: 'column' });
-                    drilldownTrends.push({ name: 'Q3-Rate', data: q3Rates, type: 'scatter', id: qm.year + 'Q3-Rate', yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' }, ref: qm.year + 'Q3' });
+                    drillDowns.push({ name: 'Q3', data: q3D, id: qm.year + 'Q3', type: 'column', qs: 'Q3' });
+                    drilldownTrends.push({ name: 'Death Rate', data: q3Rates, type: 'spline', tooltip: { valueSuffix: '%'}, id: qm.year + 'Q3-Rate', qr: 'Q3', yAxis: 1 });
 
-                    drillDowns.push({ name: 'Q4', data: q4D, id: qm.year + 'Q4', type: 'column' });
-                    drilldownTrends.push({ name: 'Q4-Rate', data: q4Rates, type: 'scatter', id: qm.year + 'Q4-Rate', yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' }, ref: qm.year + 'Q4'});
+                    drillDowns.push({ name: 'Q4', data: q4D, id: qm.year + 'Q4', type: 'column', qs: 'Q4' });
+                    drilldownTrends.push({ name: 'Death Rate', data: q4Rates, type: 'spline', tooltip: { valueSuffix: '%'}, id: qm.year + 'Q4-Rate', qr: 'Q4', yAxis: 1  });
 
                     qs.push({ name: 'Q1', y: qm.q1, drilldown: qm.year + 'Q1', color: colors[i] });
                     qs.push({ name: 'Q2', y: qm.q2, drilldown: qm.year + 'Q2', color: colors[i + 1] });
@@ -724,44 +915,67 @@
 
 
                     let qRates = [];
-                    qRates.push({ name: qm.year, y: q1rate, drilldown: qm.year + 'Q1R'});
-                    qRates.push({ name: qm.year, y: q2rate, drilldown: qm.year + 'Q2R'});
-                    qRates.push({ name: qm.year, y: q3rate, drilldown: qm.year + 'Q3R'});
-                    qRates.push({ name: qm.year, y: q4rate, drilldown: qm.year + 'Q4R'});
+                    qRates.push({ name: 'Q1', y: parseInt(q1rate) });
+                    qRates.push({ name: 'Q2', y: parseInt(q2rate) });
+                    qRates.push({ name: 'Q3', y: parseInt(q3rate) });
+                    qRates.push({ name: 'Q4', y: parseInt(q4rate) });
 
-                    drillDowns.push({ name: qm.year.toString(), data: qs, type: 'column', id: qm.year + 'Qs' });
+                    drillDowns.push({ name: qm.year.toString(), data: qs, type: 'column', id: qm.year + 'Qs', qs: qm.year.toString() });
 
-                    drilldownTrends.push({ name: qm.year.toString(), data: qRates, type: 'scatter', id: qm.year + 'QR', yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' }, ref: qm.year + 'Qs' });
+                    drilldownTrends.push({ name: 'Death Rate', data: qRates, type: 'spline', tooltip: { valueSuffix: '%'}, id: qm.year + 'QR', qr: qm.year.toString(), yAxis: 1 });
 
                     years.push({ name: qm.year.toString(), y: tDTT, drilldown: qm.year + 'Qs', color: colors[i]});
 
                     let yRate = ((tDTT / totalYears) * 100);
-                    trends.push({ name: qm.year.toString(), y: yRate, drilldown: qm.year + 'QR'});
+                    trends.push({ name: qm.year.toString(), y: parseInt(yRate)});
 
                 });
 
-                let dwQ = [{name: 'Death Toll', data: years, type: 'column', showInLegend: false}
-                    //,  { type: 'spline', name: 'Trend', data: trends, yAxis: 1,  marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'white' } }
+                let dwQ = [{name: 'Death Toll', data: years, type: 'column'},
+                    { type: 'spline', tooltip: { valueSuffix: '%' }, name: 'Death rate', data: trends, yAxis: 1, marker: { lineWidth: 2, lineColor: 'orange', fillColor: 'orange' } }
                 ];
 
                 var chart = Highcharts.chart('msDrillDown',
                     {
                         chart:
                             {
-                                type: 'column'
-                            },
-                        plotOptions:
-                            {
-                                column:
+                                events:
                                     {
-                                        pointPadding: 0,
-                                        borderWidth: 0
+                                        drilldown: function(e)
+                                        {
+                                            var chart = this;
+                                            let dt = drillDowns.filter(function (y)
+                                            {
+                                                return y.qs === e.point.name;
+                                            });
+                                            let columnSeries = [];
+                                            if(dt.length > 0)
+                                            {
+                                                columnSeries.push(dt[0]);
+                                            }
+
+                                            let qr = drilldownTrends.filter(function(y)
+                                            {
+                                                return y.qr === e.point.name;
+                                            });
+                                            let lineSeries = [];
+                                            if(qr.length > 0)
+                                            {
+                                                lineSeries.push(qr[0]);
+                                            }
+                                            if(columnSeries.length > 0 && lineSeries.length > 0)
+                                            {
+                                                series = [columnSeries[0], lineSeries[0]];
+                                                chart.addSingleSeriesAsDrilldown(e.point, series[0]);
+                                                chart.addSingleSeriesAsDrilldown(e.point, series[1]);
+                                                chart.applyDrilldown();
+                                            }
+                                        }
                                     }
                             },
-                        title:
-                            {
-                                text: 'Mortality data across selected calendar year (s)'
-                            },
+                        title: {
+                            text: 'Total number of death'
+                        },
                         xAxis:
                             {
                                 title:
@@ -778,90 +992,61 @@
                             },
                         yAxis:
                             [{ // Primary yAxis
-                                gridLineWidth: 0,
-                                minorGridLineWidth: 0,
                                 labels: {
-                                    format: '{value}',
+                                    //format: '{value}°C',
                                     style: {
                                         color: Highcharts.getOptions().colors[1]
                                     }
                                 },
                                 title: {
-                                    text: 'Mortality Data ',
+                                    text: 'Death Toll',
                                     style: {
                                         color: Highcharts.getOptions().colors[1]
                                     }
                                 }
-                            },
-                                { // Secondary yAxis
-                                    title:
-                                        {
-                                            text: '% Dead',
-                                            rotation: 270,
-                                            style: {
-                                                color: Highcharts.getOptions().colors[0]
-                                            }
-                                        },
-                                    gridLineWidth: 0,
-                                    minorGridLineWidth: 0,
-                                    min: 0,
-                                    max: 100,
-                                    labels: {
-                                        format: '{value}',
-                                        style: {
-                                            color: Highcharts.getOptions().colors[0]
-                                        }
-                                    },
-                                    opposite: true,
-                                    showFirstLabel: true,
-                                    showLastLabel: false
-                                }
-                            ],
+                            }, { // Secondary yAxis
+                                title: {
+                                    text: 'Death Rate',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[0]
+                                    }
+                                },
+                                labels: {
+                                    format: '{value} %',
+                                    style: {
+                                        color: Highcharts.getOptions().colors[0]
+                                    }
+                                },
+                                min: 0,
+                                max: 100,
+                                opposite: true
+                            }],
                         tooltip:
                             {
-                                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
-                                pointFormat: '<tr><td style="color:{point.color};padding:0">Number of Deaths: </td>' +
+                                headerFormat: '<span style="font-size:13px; font-weight: bold">{point.key}</span><table>',
+                                pointFormat: '<tr><td style="color:{point.color};padding:0">{series.name}: </td>' +
                                     '<td style="padding:0"><b>{point.y} <b></td></tr>',
                                 footerFormat: '</table>',
-                                //shared: true,
+                                shared: true,
                                 useHTML: true
                             },
+                        labels: {
+                            items: [{
+                                html: '',
+                                style: {
+                                    left: '50px',
+                                    top: '18px',
+                                    color: (Highcharts.theme && Highcharts.theme.textColor) || 'black'
+                                }
+                            }]
+                        },
                         series: dwQ,
-                        drilldown:
-                            {
-                                series:drillDowns
-                            },
-                        responsive:
-                            {
-                                rules: [{
-                                    condition: {
-                                        maxWidth: 500
-                                    },
-                                    chartOptions: {
-                                        legend: {
-                                            align: 'center',
-                                            verticalAlign: 'bottom',
-                                            layout: 'horizontal'
-                                        },
-                                        yAxis: {
-                                            labels: {
-                                                align: 'left',
-                                                x: 0,
-                                                y: -5
-                                            },
-                                            title: {
-                                                text: null
-                                            }
-                                        },
-                                        subtitle: {
-                                            text: null
-                                        },
-                                        credits: {
-                                            enabled: false
-                                        }
-                                    }
-                                }]
-                            }
+                        drilldown: {
+                            series: drillDowns
+                        },
+                        exporting: {
+                            enabled: true
+                        }
                     });
             }
 

@@ -87,6 +87,11 @@ class MonitoringController extends Controller
         return view('monitoring.ahd');
     }
 
+    public function dsd(): Factory|View|Application
+    {
+        return view('monitoring.dsd');
+    }
+
 
 
 

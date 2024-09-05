@@ -141,6 +141,89 @@ function Build_Pos_Neg_Chart(id, title, categories, series_data, max) {
     });
 }
 
+function Build_Pos_Neg_Chart1(id, title, categories, series_data, max) {
+
+    Highcharts.chart(id, {
+        chart: {
+            type: 'bar',
+            height: 500
+        },
+        title: {
+            text: 'Number of Dead Clients Disaggregated by Age and Sex'
+        },
+        colors: ['#000000','#000000'],
+        xAxis: [{
+            categories: categories,
+            reversed: false,
+            labels: {
+                step: 1,
+            },
+
+            title: {
+                text: "Age (Male)"
+            },
+        }, { // mirror axis on right side
+            opposite: true,
+            reversed: false,
+            categories: categories,
+            linkedTo: 0,
+            labels: {
+                step: 1
+            },
+            title: {
+                text: "Age (Female)"
+            },
+        }],
+        yAxis: {
+            gridLineWidth: 0,
+            minorGridLineWidth: 0,
+            labels: {
+                formatter: function () {
+                    return Math.abs(this.value);
+                },
+            },
+            title: {
+                text: "No. of Deaths",
+                style: {
+                    color: Highcharts.getOptions().colors[1]
+                }
+            },
+            max: (max + percentage(max, 10)),
+            min: -(max + percentage(max, 10))
+        },
+
+        plotOptions: {
+            series: {
+                stacking: 'normal',
+                grouping: false,
+                pointWidth: 8
+            }
+        },
+
+        tooltip: {
+            formatter: function () {
+                return '<b>' + this.series.name + ', age ' + this.point.category + '</b><br/>' +
+                    'Total: ' + Highcharts.numberFormat(Math.abs(this.point.y), 0);
+            }
+        },
+
+        /*tooltip:
+            {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>' + Math.abs(this.point.y) + '<b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },*/
+
+        exporting: { enabled: true },
+
+        series: series_data
+
+    });
+}
+
 function percentage(num, per) {
     var result = num * (per / 100);
     return Math.round(result);
@@ -3596,6 +3679,87 @@ function build_stacked_mschart(container_id, xaxisCategory, yaxistitle, seriesDa
         },
         series: seriesData
     });
+}
+
+function build_bar_charts_commodity(id, title, yaxistitle, principal_data, drill_down_data, vals) {
+
+    var colors = vals;
+
+    if ((drill_down_data || []).length > 0) {
+        drill_down_data.forEach((v) => {
+            v.events = {
+                afterAnimate: function (event) {
+                    resizeChart(this.chart.container.parentElement);
+                    this.chart.reflow();
+                }
+            };
+        });
+    }
+    if (principal_data.length > 0) {
+        principal_data.forEach((s) => {
+            s.events = {
+                afterAnimate: function (event) {
+                    resizeChart(this.chart.container.parentElement);
+                    this.chart.reflow();
+                }
+            };
+        });
+    }
+
+    yaxistitle = yaxistitle;
+
+    var yAxis = [{
+        title: {
+            text: yaxistitle
+        },
+        labels: {
+            formatter: function () {
+                return this.value;
+            }
+        }
+    }];
+
+    var test = {
+
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: null,
+            style: {
+                fontSize: '12px'
+            }
+        },
+        subtitle: {
+            text: ''
+        },
+        xAxis: {
+            type: 'category',
+            title: {
+                text: "States",
+                enabled: false
+            }
+        },
+        yAxis: yAxis,
+        legend: {
+            enabled: true
+        },
+        plotOptions: {
+            series: {
+                colors: colors,
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b>'
+        },
+        exporting: { enabled: false },
+        series: principal_data,
+        drilldown: {
+            series: drill_down_data
+        }
+    };
+    Highcharts.chart(id, test);
 }
 
 

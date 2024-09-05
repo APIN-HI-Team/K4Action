@@ -12,48 +12,24 @@ class HomeController extends Controller
 {
     public function index(): Renderable
     {
-        $students = TreatmentCurrent::select("sex as sex", \DB::raw("COUNT('pepid') as count"))
-            ->where('CurrentARTStatus_Pharmacy','=','Active')
-            ->where('Outcomes',NULL)
+        $students = TreatmentCurrent::select("sex as sex", "COUNT as count")
             ->groupBy('sex')
             ->get();
 
-        $studentsNew = TreatmentCurrent::select("sex as sex", \DB::raw("COUNT('pepid') as count"))
-            ->where('CurrentARTStatus_Pharmacy','=','Active')
-            ->where('Outcomes',NULL)
-            ->where('TI','!=','Yes')
-            ->wherebetween('ARTStartDate',['2021-10-01','2022-09-30'])
+        $studentsNew = DB::table('txnew_table')
+            ->select(DB::raw("sex as sex, count as count"))
             ->groupBy('sex')
             ->get();
 
-        $txcurrAge = DB::table('linelist_full_apin')
-            ->select(DB::raw("
-               (CASE WHEN current_age <= 9 THEN '≤9'
-               WHEN current_age BETWEEN 10 AND 19 THEN '10 -19'
-               WHEN current_age BETWEEN 20 AND 24 THEN '20 - 24'
-               WHEN current_age >= 25 THEN '25 +'
-               END) as age_range,COUNT(pepid) AS count"))
-            ->where('CurrentArtStatus_Pharmacy','=','Active')
-            ->where('Outcomes',NULL)
+        $txcurrAge = DB::table('txcurrage_table')
+            ->select(DB::raw("age_range as age_range, count as count"))
             ->groupBy('age_range')
             ->get();
 
-        $txnewAge = DB::table('linelist_full_apin')
-            ->select(DB::raw("
-               (CASE WHEN current_age <= 9 THEN '≤9'
-               WHEN current_age BETWEEN 10 AND 19 THEN '10 -19'
-               WHEN current_age BETWEEN 20 AND 24 THEN '20 - 24'
-               WHEN current_age >= 25 THEN '25 +'
-               END) as age_range,COUNT(pepid) AS count"))
-            ->where('CurrentArtStatus_Pharmacy','=','Active')
-            ->where('TI','!=','Yes')
-            ->where('Outcomes',NULL)
-            ->wherebetween('ARTStartDate',['2021-10-01','2022-09-30'])
+        $txnewAge = DB::table('txnewage_table')
+            ->select(DB::raw("age_range as age_range, count as count"))
             ->groupBy('age_range')
-            ->get();/*public function getPerformance(){
-        $performance = TreatmentPerformance::all();
-        return view('home',compact('performance'));
-    }*/
+            ->get();
 
         $performance = DB::table('treatment_report')
             ->select(DB::raw("*"))
@@ -62,13 +38,10 @@ class HomeController extends Controller
             ->orderBy('facility_name', 'asc')
             ->get();
 
-        
-        $tx_curr = DB::table('linelist_full_apin')
+
+        $tx_curr = DB::table('curr_table')
             ->select(DB::raw('
-                state as name,
-                CAST(COALESCE(SUM(CurrentARTStatus_Pharmacy = "Active"), 0) as  UNSIGNED) AS x,
-                CAST(COALESCE(SUM(CurrentARTStatus_Pharmacy = "Active" and sex = "M"), 0) as  UNSIGNED) AS y,
-                CAST(COALESCE(SUM(CurrentARTStatus_Pharmacy = "Active" and sex = "F"), 0) as  UNSIGNED) AS z
+                name,x,y,z
             '))
             ->groupBy('name')
             ->get();
